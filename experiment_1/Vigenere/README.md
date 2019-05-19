@@ -65,7 +65,7 @@ vigenere.test()
 运行模块中原有的一组测试
 
 ```python
-vigenere.display(str， number=50)
+vigenere.display(str, number=50)
 ```
 
 输出明文或者密文，默认按照每行50个字符输出
