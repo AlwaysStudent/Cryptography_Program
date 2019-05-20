@@ -1,6 +1,6 @@
 #!/opt/anaconda
 # -*- coding = utf-8 -*-
-from .Vigenere import vigenere
+from Vigenere import vigenere
 
 
 def main():
