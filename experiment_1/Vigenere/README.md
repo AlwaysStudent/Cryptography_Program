@@ -9,10 +9,10 @@
 在文件夹所在目录下进行代码编写
 
 ```python
-from .Vigenere import vigenere
+from Vigenere import vigenere
 ```
 
-使用上面的指令导入该模块
+使用上面的指令导入该模块（在pycharm中可能会出现识别错误，在命令行下没有问题）
 
 ### __加解 & 解密（有密钥）__
 
