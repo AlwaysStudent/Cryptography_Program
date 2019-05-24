@@ -148,7 +148,7 @@ def add_zero_last(source_text, number):
     if len(source_text) < number:
         result_text = source_text + '0' * (number - len(source_text))
     else:
-        result_text = source_tex
+        result_text = source_text
     return result_text
 
 
