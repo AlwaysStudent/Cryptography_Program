@@ -35,9 +35,15 @@ class des:
     def encode(self, plain_text):
         # use plain_text and key to encode
         self.plain_text = plain_text
-
-
-
+        # group plain_text into list
+        # each element in list has 64 bits
+        plain_text_list = group(self.plain_text)
+        crypto_text = ''
+        # using run_coding to encode each piece of plain_text
+        for each in range(len(plain_text_list)):
+            temp = self.run_coding(plain_text_list[each], each)
+            crypto_text += temp
+        self.crypto_text = crypto_text
         return self.crypto_text
 
     def decode(self, crypto_text):
@@ -97,26 +103,53 @@ class des:
         self.key = bin2hex(key_temp)
 
     def run_coding(self, text, number):
-        temp_text = ascii2bin(text)
-        atfer_ip_switch_text = ip_switch(temp_text, 1)
-        atfer_feistel_text = feistel(atfer_ip_switch_text, self.key_list, number)
+        # use ip_switch to switch the text by ip(1)
+        atfer_ip_switch_text = ip_switch(text, 1)
+        # run feistel net with key_list to coding the text
+        atfer_feistel_text = feistel_net(atfer_ip_switch_text, self.key_list, number)
+        # use ip_switch to switch the text by ip(-1)
+        final_text = ip_switch(atfer_feistel_text, -1)
+        return final_text
 
 
-def feistel(text, key_list, number):
+def feistel_net(text, key_list, number):
+    # run feistel net
+    # 16 round coding
+    # number is equal to 1 means encode and -1 means decode
     temp_text = text
-    for i in range(16):
-        letf_text = temp_text[:32]
+    for i in range(16)[::number]:
+        left_text = temp_text[:32]
         right_text = temp_text[32:]
-        temp =
-        temp_text = right_text +
+        temp = function_f(right_text, key_list[i])
+        temp_text = right_text + xor(left_text, temp)
+    return temp_text
 
 
-def ascii2bin(text):
+def function_f(text, key):
+    # use s-box to switch text with key
+    pass
 
+
+def group(text):
+    # group text into list
+    # each element in list has 64 bits
+    text_list = [bin(ord(i)).replace('0b', '') for i in list(text)]
+    result_list = []
+    temp = []
+    for i in range(len(text_list)):
+        temp.append((text_list[i]))
+        if i % 8 == 7:
+            result_list.append(''.join(temp))
+            temp = []
+    result_list.append(add_zero_last(''.join(temp), 64))
+    return result_list
 
 
 def ip_switch(text, ip_choose):
-    ip_switch_matrix =  [[58, 50, 42, 34, 26, 18, 10, 2],
+    # use two ip_switch_matrix(s) to switch text
+    # ip_choose is equal to 1 means make ip_switch to text by using ip_switch_matrix
+    # ip_choose is equal to -1 means make inverse_ip_switch to text by using ip_switch_matrix
+    ip_switch_matrix = [[58, 50, 42, 34, 26, 18, 10, 2],
                         [60, 52, 44, 36, 28, 20, 12, 4],
                         [62, 54, 46, 38, 30, 22, 14, 6],
                         [64, 56, 48, 40, 32, 24, 16, 8],
@@ -180,19 +213,8 @@ def switch_by_matrix(source_text, matrix):
     return result_text
 
 
-def split_the_text(source_text, number):
-    text_list = []
-    temp = ''
-    for i in range(len(source_text)):
-        temp += source_text[i]
-        if (i + 1) % number == 0:
-            text_list.append(temp)
-            temp = []
-    text_list = [add_zero_last(i, 64) for i in text_list]
-    return text_list
-
-
 def add_zero_last(source_text, number):
+    # add zero in the last of the source_text until the length of it is equal to number
     if len(source_text) < number:
         result_text = source_text + '0' * (number - len(source_text))
     else:
