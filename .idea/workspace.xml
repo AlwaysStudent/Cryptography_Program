@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ce20cab6-4423-4886-a4cf-99e7cc2117ae" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiment_2/DES/des.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiment_2/DES/des.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -15,8 +16,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/experiment_2/DES/des.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
-              <caret line="12" column="32" selection-start-line="12" selection-start-column="32" selection-end-line="12" selection-end-column="32" />
+            <state relative-caret-position="403">
+              <caret line="106" column="68" lean-forward="true" selection-start-line="106" selection-start-column="68" selection-end-line="106" selection-end-column="68" />
             </state>
           </provider>
         </entry>
@@ -33,8 +34,8 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="349" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="48" />
     <option name="y" value="28" />
     <option name="width" value="916" />
     <option name="height" value="1050" />
@@ -51,6 +52,17 @@
             <path>
               <item name="Cryptography_Program" type="b2602c69:ProjectViewProjectNode" />
               <item name="Cryptography_Program" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Cryptography_Program" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Cryptography_Program" type="462c0819:PsiDirectoryNode" />
+              <item name="experiment_1" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Cryptography_Program" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Cryptography_Program" type="462c0819:PsiDirectoryNode" />
+              <item name="experiment_1" type="462c0819:PsiDirectoryNode" />
+              <item name="Vigenere" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Cryptography_Program" type="b2602c69:ProjectViewProjectNode" />
@@ -146,7 +158,7 @@
   <component name="ToolWindowManager">
     <frame x="48" y="28" width="1872" height="1052" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12349067" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12843029" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -168,10 +180,13 @@
     </layout>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/experiment_1/Vigenere/README.md">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/experiment_2/DES/des.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="12" column="32" selection-start-line="12" selection-start-column="32" selection-end-line="12" selection-end-column="32" />
+        <state relative-caret-position="403">
+          <caret line="106" column="68" lean-forward="true" selection-start-line="106" selection-start-column="68" selection-end-line="106" selection-end-column="68" />
         </state>
       </provider>
     </entry>
