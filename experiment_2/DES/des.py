@@ -39,13 +39,15 @@ class des:
         # group plain_text into list
         # each element in list has 64 bits
         plain_text_list = group(self.plain_text)
-        print(plain_text_list)
         crypto_text = ''
+        print(plain_text_list)
         # using run_coding to encode each piece of plain_text
         for each in range(len(plain_text_list)):
             temp = self.run_coding(plain_text_list[each], 1)
             crypto_text += temp
-        self.crypto_text = crypto_text
+            print(temp)
+        self.crypto_text = bin2hex(crypto_text)
+        print(self.crypto_text)
         return self.crypto_text
 
     def decode(self, crypto_text):
@@ -122,7 +124,7 @@ def feistel_net(text, key_list, number):
         left_text = temp_text[:32]
         right_text = temp_text[32:]
         temp = function_f(right_text, key_list[i])
-        temp_text = right_text + xor(left_text, temp)
+        temp_text = right_text + add_zero(xor(left_text, temp), 32)
     return temp_text
 
 
@@ -140,6 +142,14 @@ def function_f(text, key):
                 [1, 15, 23, 26, 5, 18, 31, 10],
                 [2, 8, 24, 14, 32, 27, 3, 9],
                 [19, 13, 30, 6, 22, 11, 4, 25]]
+    after_e_switch_text = switch_by_matrix(text, e_switch)
+    after_xor_key = add_zero(xor(after_e_switch_text, hex2bin(key)), 48)
+    after_s_box_text = s_box_switch(after_xor_key)
+    after_p_switch_text = switch_by_matrix(after_s_box_text, p_switch)
+    return after_p_switch_text
+
+
+def s_box_switch(text):
     s_box = [[[14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7],
               [0, 15, 7, 4, 14, 2, 13, 1, 10, 6, 12, 11, 9, 5, 3, 8],
               [4, 1, 14, 8, 13, 6, 2, 11, 15, 12, 9, 7, 3, 10, 5, 0],
@@ -179,8 +189,24 @@ def function_f(text, key):
               [1, 15, 13, 8, 10, 3, 7, 4, 12, 5, 6, 11, 0, 14, 9, 2],
               [7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8],
               [2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11]]]
-    atfer_e_switch_text = switch_by_matrix(text, e_switch)
-    after_xor_key = xor(atfer_e_switch_text, key)
+    text_list = []
+    temp = ''
+    for i in range(len(text)):
+        temp += text[i]
+        if i % 6 == 5:
+            text_list.append(temp)
+            temp = ''
+    result_text = ''
+    for i in range(len(text_list)):
+        result_text += s_switch(text_list[i], s_box[i])
+    return result_text
+
+
+def s_switch(text, part_s_box):
+    a = int('0b' + (text[0] + text[5]), 2)
+    b = int('0b' + text[1:5], 2)
+    result = part_s_box[a][b]
+    return add_zero(bin(result).replace('0b', ''), 4)
 
 
 def group(text):
@@ -194,7 +220,8 @@ def group(text):
         if i % 8 == 7:
             result_list.append(''.join(temp))
             temp = []
-    result_list.append(add_zero_last(''.join(temp), 64))
+    if len(temp) != 0:
+        result_list.append(add_zero_last(''.join(temp), 64))
     return result_list
 
 
@@ -219,17 +246,18 @@ def ip_switch(text, ip_choose):
                           [34, 2, 42, 10, 50, 18, 58, 26],
                           [33, 1, 41, 9, 49, 17, 57, 25]]
     result_text = ''
-    print(text)
     if ip_choose == 1:
         result_text = switch_by_matrix(text, ip_switch_matrix)
     if ip_choose == -1:
         result_text = switch_by_matrix(text, ip_switch_matrix_1)
-    print(result_text)
     return result_text
 
 
 def xor(a, b):
-    return a ^ b
+    temp_a = int('0b' + a, 2)
+    temp_b = int('0b' + b, 2)
+    temp = temp_a ^ temp_b
+    return bin(temp).replace('0b', '')
 
 
 def add_zero(source_text, number):
@@ -279,13 +307,9 @@ def add_zero_last(source_text, number):
 
 def test():
     # test des
-    c = 'fuck'*60
+    c = 'werk'*40
     key1 = 'e' * 14
     x = des(key1)
-    print('\n\n')
-    print(x.real_key)
-    print(x.key)
-    print(x.key_len)
     print(x.key_list)
 
     k = x.encode(c)
