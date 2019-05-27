@@ -39,10 +39,11 @@ class des:
         # group plain_text into list
         # each element in list has 64 bits
         plain_text_list = group(self.plain_text)
+        print(plain_text_list)
         crypto_text = ''
         # using run_coding to encode each piece of plain_text
         for each in range(len(plain_text_list)):
-            temp = self.run_coding(plain_text_list[each], each)
+            temp = self.run_coding(plain_text_list[each], 1)
             crypto_text += temp
         self.crypto_text = crypto_text
         return self.crypto_text
@@ -104,7 +105,7 @@ class des:
 
     def run_coding(self, text, number):
         # use ip_switch to switch the text by ip(1)
-        atfer_ip_switch_text = ip_switch(add_zero(hex2bin(text), 64), 1)
+        atfer_ip_switch_text = ip_switch(text, 1)
         # run feistel net with key_list to coding the text
         atfer_feistel_text = feistel_net(atfer_ip_switch_text, self.key_list, number)
         # use ip_switch to switch the text by ip(-1)
@@ -117,7 +118,7 @@ def feistel_net(text, key_list, number):
     # 16 round coding
     # number is equal to 1 means encode and -1 means decode
     temp_text = text
-    for i in range(16)[::number]:
+    for i in range(0, 16, number):
         left_text = temp_text[:32]
         right_text = temp_text[32:]
         temp = function_f(right_text, key_list[i])
@@ -185,7 +186,7 @@ def function_f(text, key):
 def group(text):
     # group text into list
     # each element in list has 64 bits
-    text_list = [bin(ord(i)).replace('0b', '') for i in list(text)]
+    text_list = [add_zero(bin(ord(i)).replace('0b', ''), 8) for i in list(text)]
     result_list = []
     temp = []
     for i in range(len(text_list)):
@@ -218,10 +219,12 @@ def ip_switch(text, ip_choose):
                           [34, 2, 42, 10, 50, 18, 58, 26],
                           [33, 1, 41, 9, 49, 17, 57, 25]]
     result_text = ''
+    print(text)
     if ip_choose == 1:
         result_text = switch_by_matrix(text, ip_switch_matrix)
     if ip_choose == -1:
         result_text = switch_by_matrix(text, ip_switch_matrix_1)
+    print(result_text)
     return result_text
 
 
@@ -276,6 +279,7 @@ def add_zero_last(source_text, number):
 
 def test():
     # test des
+    c = 'fuck'*60
     key1 = 'e' * 14
     x = des(key1)
     print('\n\n')
@@ -283,6 +287,8 @@ def test():
     print(x.key)
     print(x.key_len)
     print(x.key_list)
+
+    k = x.encode(c)
 
 
 if __name__ == '__main__':
