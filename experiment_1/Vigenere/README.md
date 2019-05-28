@@ -29,7 +29,7 @@ t = vigenere.vigenere(key)
 key = [4, 7, 2, 3]
 ```
 
-####__加密 & 解密__
+#### __加密 & 解密__
 
 ```python
 ciphertext = t.encode(plaintext)
