@@ -40,20 +40,30 @@ class des:
         # each element in list has 64 bits
         plain_text_list = group(self.plain_text)
         crypto_text = ''
-        print(plain_text_list)
         # using run_coding to encode each piece of plain_text
         for each in range(len(plain_text_list)):
             temp = self.run_coding(plain_text_list[each], 1)
             crypto_text += temp
-            print(temp)
         self.crypto_text = bin2hex(crypto_text)
-        print(self.crypto_text)
         return self.crypto_text
 
     def decode(self, crypto_text):
         # use plain_text and key to decode
         self.crypto_text = crypto_text
-
+        crypto_text_list = split_text(self.crypto_text, 16)
+        plain_text = ''
+        for each in range(len(crypto_text_list)):
+            temp = self.run_coding(crypto_text_list[each], -1)
+            plain_text += temp
+        self.plain_text = bin2hex(plain_text)
+        print(plain_text)
+        plain_text_list = split_text(plain_text, 16)
+        print(plain_text_list)
+        temp = ''
+        print('kkkk', len(plain_text_list), plain_text_list)
+        for i in plain_text_list:
+            temp += chr(int('0b' + i, 2))
+        print(temp)
         return self.plain_text
 
     def create_key_list(self):
@@ -115,12 +125,25 @@ class des:
         return final_text
 
 
+def split_text(text, number):
+    result = []
+    temp = ''
+    for i in range(len(text)):
+        temp += text[i]
+        if i % number == number - 1:
+            result.append(temp)
+            temp = ''
+    if len(temp) != 0:
+        result.append(temp)
+    return [add_zero(hex2bin(each), 64) for each in result]
+
+
 def feistel_net(text, key_list, number):
     # run feistel net
     # 16 round coding
     # number is equal to 1 means encode and -1 means decode
     temp_text = text
-    for i in range(0, 16, number):
+    for i in list(range(0, 16))[::number]:
         left_text = temp_text[:32]
         right_text = temp_text[32:]
         temp = function_f(right_text, key_list[i])
@@ -307,12 +330,17 @@ def add_zero_last(source_text, number):
 
 def test():
     # test des
-    c = 'werk'*40
+    m = 'werk' * 40
     key1 = 'e' * 14
-    x = des(key1)
-    print(x.key_list)
+    c = '8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd8a6811fc413cf4cd'
 
-    k = x.encode(c)
+    x = des(key1)
+
+    k = x.encode(m)
+    s = x.decode(c)
+
+    print(k)
+    print(s)
 
 
 if __name__ == '__main__':
