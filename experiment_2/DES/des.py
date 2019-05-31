@@ -89,12 +89,12 @@ class des:
         :return:
         """
         # coding by 'utf-8'
-        self.plain_text = coding(plain_text)
+        self.plain_text = encoding(plain_text)
+        print(self.plain_text)
         # group plain_text into list
         # each element in list has 64 bits
         plain_text_list = group_text(self.plain_text, 16)
         plain_text_list = [add_zero_last(i, 16) for i in plain_text_list]
-        print(plain_text_list)
         crypto_text = ''
         # using run_coding to encode each piece of plain_text
         for each in range(len(plain_text_list)):
@@ -102,6 +102,20 @@ class des:
             crypto_text += temp
         self.crypto_text = bin2hex(crypto_text)
         return self.crypto_text
+
+    def decrypt(self, crypto_text):
+        self.crypto_text = crypto_text
+        # group plain_text into list
+        # each element in list has 64 bits
+        crypto_text_list = group_text(self.crypto_text, 16)
+        print(crypto_text_list)
+        plain_text = ''
+        # using run_coding to encode each piece of plain_text
+        for each in range(len(crypto_text_list)):
+            temp = self.run(crypto_text_list[each], -1)
+            plain_text += temp
+        self.plain_text = bin2hex(plain_text)
+        return self.plain_text
 
     def run(self, part_text, number):
         """
@@ -113,7 +127,6 @@ class des:
         temp_text = add_zero_front(hex2bin(part_text), 64)
         # use ip_switch to switch the text by ip(1)
         atfer_ip_switch_text = ip_switch(temp_text, 1)
-        print(atfer_ip_switch_text)
         # run feistel net with key_list to coding the text
         atfer_feistel_text = feistel_net(atfer_ip_switch_text, self.key_list, number)
         # use ip_switch to switch the text by ip(-1)
@@ -131,10 +144,12 @@ def feistel_net(bin_text, key_list, number):
     """
     temp_text = bin_text
     for i in list(range(0, 16))[::number]:
+        print(i, '', end='')
         left_text = temp_text[:32]
         right_text = temp_text[32:]
         temp = function_f(right_text, key_list[i])
-        temp_text = right_text + add_zero(xor(left_text, temp), 32)
+        temp_text = right_text + xor(left_text, temp, 32)
+    print()
     return temp_text
 
 
@@ -160,7 +175,6 @@ def function_f(right_bin_text, key):
     temp_key = hex2bin(key)
     after_e_switch_text = switch_by_matrix(right_bin_text, e_switch)
     after_xor_key = xor(after_e_switch_text, temp_key, 48)
-    print(len(after_xor_key))
     after_s_box_text = s_box_switch(after_xor_key)
     after_p_switch_text = switch_by_matrix(after_s_box_text, p_switch)
     return after_p_switch_text
@@ -207,7 +221,6 @@ def s_box_switch(bin_text):
               [7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8],
               [2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11]]]
     text_list = group_text(bin_text, 6)
-    print(text_list)
     result_text = ''
     for i in range(len(text_list)):
         result_text += s_switch(text_list[i], s_box[i])
@@ -218,8 +231,6 @@ def s_switch(bin_text, part_s_box):
     a = int('0b' + (bin_text[0] + bin_text[5]), 2)
     b = int('0b' + bin_text[1:5], 2)
     result = part_s_box[a][b]
-    print(a, b)
-    print(result)
     return add_zero_front(bin(result).replace('0b', ''), 4)
 
 
@@ -265,7 +276,7 @@ def ip_switch(bin_text, ip_choose):
     return result_text
 
 
-def coding(text):
+def encoding(text):
     temp1 = base64.b64encode(text.encode('utf-8'))
     temp2 = base64.b16encode(temp1)
     return temp2.decode('utf-8')
@@ -376,10 +387,12 @@ def create_des_key():
 
 
 def test():
-    key = '8111a006c92dac48'
+    key = 'f'*16
     x = des(key)
-    m = 'Hello World for every one who is coding'
-    x.encrypt(m)
+    m = '111111'
+    c = '22a4794110fcf47a'
+    print(x.encrypt(m))
+    print(x.decrypt(c))
 
 
 if __name__ == '__main__':
