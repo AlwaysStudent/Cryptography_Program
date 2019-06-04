@@ -1,25 +1,76 @@
 #!/opt/anaconda/python3
 # -*- coding=utf-8 -*-
 import random
-import base64
 
 
 class rsa:
     """
     RSA encryption algorithm
     """
-    def __init__(self, bit_length):
+    def __init__(self, bit_length, flag=0):
+        """
+        init rsa
+        :param bit_length: give the bit_length for rsa to auto create the public key and private key
+        :param flag:
+        if flag == 0, means that use auto created key
+        if flag == 0, means that use your key
+        """
+        self.check_bit_length(bit_length)
         self.bit_length = bit_length
         self.p = 0
         self.q = 0
         self.n = 0
         self.e = 0
         self.d = 0
-        self.create_key()
-        self.public_key = self.create_public_key()
-        self.private_key = self.create_private_key()
+        self.n_length = 0
+        if flag == 0:
+            self.create_key()
+            self.public_key = self.create_public_key()
+            self.private_key = self.create_private_key()
+        elif flag == 1:
+            pass
+
+    def add_public_key(self, public_key):
+        """
+        add a public key in tuple
+        :param public_key: a tuple include (n, e)
+        :return: nothing
+        """
+        self.n, self.e = public_key
+        self.n_length = len(bin(self.n)) - 2
+        self.public_key = public_key
+
+    def add_private_key(self, private_key):
+        """
+        add a private key in tuple
+        :param private_key: a tuple include (n, d)
+        :return: nothing
+        """
+        self.n, self.d = private_key
+        self.n_length = len(bin(self.n)) - 2
+        self.private_key = private_key
+
+    def check_bit_length(self, bit_length):
+        """
+        check the bit_length
+        :param bit_length: bit_length
+        :return:
+        """
+        try:
+            assert bit_length % 8 == 0
+        except AssertionError:
+            print('[info] the bit length is illegal')
+            exit(0)
+        else:
+            pass
 
     def create_key(self):
+        """
+        1.use miller_rabin_test to create p, q
+        2.calculate n = p * q and f_n = (p - 1)(q - 1)
+        3.random select e which make gcd(e, f_n) == 1 and calculate d which make e * d == 1 (mod f_n)
+        :return: nothing
+        """
         p = create_prime(self.bit_length)
         q = create_prime(self.bit_length)
         while p == q:
@@ -28,6 +79,7 @@ class rsa:
         self.p = p
         self.q = q
         self.n = self.p * self.q
+        self.n_length = len(bin(self.n)) - 2
         e = random.getrandbits(64)
         f_n = (self.p - 1) * (self.q - 1)
         while gcd(f_n, e) > 1:
@@ -44,22 +96,148 @@ class rsa:
             pass
 
     def create_public_key(self):
+        """
+        just return public key
+        :return: public key in tuple
+        """
         return self.n, self.e
 
     def create_private_key(self):
+        """
+        just return private key
+        :return: private key in tuple
+        """
         return self.n, self.d
 
+    def check_crypt(self):
+        """
+        check whether you have n or not
+        :return: nothing
+        """
+        try:
+            assert self.n != 0
+        except AssertionError:
+            print('[info] need public key or private key')
+            exit(0)
+        else:
+            pass
+
     def encrypt(self, plain_text):
-        plain_text_list = coding(plain_text, self.bit_length)
+        """
+        use public key to encrypt the plain_text
+        :param plain_text: plain_text which use ASCII code
+        :return: crypto_text coded by hex
+        """
+        self.check_crypt()
+        # encode and group the plain_text
+        plain_text_list = encoding(plain_text, self.bit_length)
+        crypt_text = ''
+        # encrypt every element in plain_text_list
+        for i in plain_text_list:
+            temp = pow(i, self.e, self.n)
+            temp = add_zero(bin(temp).replace('0b', ''), self.n_length, 0)
+            crypt_text += temp
+        # return crypt_text coded by hex
+        return hex(int(crypt_text, 2)).replace('0x', '')
 
-def coding(text, bit_length):
-    bit_len = (bit_length / 8) - 11
+    def decrypt(self, crypt_text):
+        """
+        use private key to decrypt the crypt_text
+        :param crypt_text: crypt_text which use hex
+        :return: plain_text coded by ASCII
+        """
+        self.check_crypt()
+        # decode and group the crypt_text
+        crypt_text_list = decoding(crypt_text, self.n_length)
+        plain_text = ''
+        # decrypt every element in crypt_text_list
+        for i in crypt_text_list:
+            temp = pow(i, self.d, self.n)
+            plain_text += num2str(temp)
+        # return plain_text coded by ASCII
+        return plain_text
 
 
+def str2num(string):
+    # change string to number
+    # string must be ASCII string
+    result = ''
+    for i in string:
+        temp = add_zero(bin(ord(i)).replace('0b', ''), 8, 0)
+        result += temp
+    return int(result, 2)
 
-def text_split(text, length_each_element)
+
+def num2str(number):
+    # change number to string
+    # the string must be ASCII string
+    result = ''
+    number_bin = bin(number).replace('0b', '')[::-1]
+    temp = ''
+    for i in range(len(number_bin)):
+        temp += number_bin[i]
+        if (i + 1) % 8 == 0:
+            result += chr(int(temp[::-1], 2))
+            temp = ''
+    if len(temp) > 0:
+        result += chr(int(temp[::-1], 2))
+    return result[::-1]
+
+
+def encoding(text, bit_length):
+    """
+    encode and group the plain_text coded by ASCII
+    :param text: ASCII string
+    :param bit_length: rsa public_key bit length
+    :return: bit_text_list
+    """
+    bit_len = int((bit_length / 8) - 11)
+    bit_text = bin(str2num(text)).replace('0b', '0')
+    bit_text_list = text_split(bit_text, bit_len * 8)
+    bit_text_list = [int(i, 2) for i in bit_text_list]
+    return bit_text_list
+
+
+def decoding(text, bit_length):
+    """
+    decode and group the crypt_text coded by hex
+    :param text: hex string
+    :param bit_length: bit length of n in rsa
+    :return: bit_text_list
+    """
+    bit_text = bin(int(text, 16)).replace('0b', '')
+    temp_text = bit_text[::-1]
+    temp_text_list = text_split(temp_text, bit_length)
+    temp_text_list = [int(i[::-1], 2) for i in temp_text_list][::-1]
+    return temp_text_list
+
+
+def add_zero(bit_text, text_length, flag):
+    # add zero to help encode and decode
+    # if flag == 0, means that add zero in the front of bit text
+    # if flag == 1, means that add zero in the last of bit text
+    if flag == 0:
+        return (text_length - len(bit_text)) * '0' + bit_text
+    elif flag == 1:
+        return bit_text + (text_length - len(bit_text)) * '0'
+
+
+def text_split(text, length_each_element):
+    # split text in a list, each element in list have the same length
+    temp = ''
+    result_list = []
+    for i in range(len(text)):
+        temp += text[i]
+        if (i + 1) % length_each_element == 0:
+            result_list.append(temp)
+            temp = ''
+    if len(temp) > 0:
+        result_list.append(temp)
+    return result_list
+
 
 def ex_gcd(a, b):
+    # extended Euclidean algorithm
     if b == 0:
         return 1, 0, a
     x, y, r = ex_gcd(b, a % b)
@@ -70,6 +248,7 @@ def ex_gcd(a, b):
 
 
 def gcd(a, b):
+    # Euclidean algorithm
     if b == 0:
         return a
     else:
@@ -77,6 +256,7 @@ def gcd(a, b):
 
 
 def miller_rabin_test(n, times):
+    # miller_rabin_test to test whether n is a prime number or not
     m = n - 1
     k = 0
     while m % 2 == 0:
@@ -97,11 +277,13 @@ def miller_rabin_test(n, times):
         if not isprime:
             return False
         else:
-            print("Passed Miller-Rabin Test Round " + str(i))
+            continue
+            # print("Passed Miller-Rabin Test Round " + str(i))
     return True
 
 
 def primality_test(n):
+    # test whether n is a prime number or not
     small_prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67,
                         71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149,
                         151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229,
@@ -127,11 +309,12 @@ def primality_test(n):
     for prime in small_prime_list:
         if n % prime == 0:
             return False
-    print("Passed small prime test")
+    # print("Passed small prime test")
     return miller_rabin_test(n, 50)
 
 
 def create_prime(bit_length):
+    # create prime number by bit_length
     number = random.getrandbits(bit_length)
     while primality_test(number) is False:
         number = random.getrandbits(bit_length)
@@ -139,10 +322,18 @@ def create_prime(bit_length):
 
 
 def test():
-    k = rsa(512)
-    print(k.public_key)
-    print(k.private_key)
-
+    # test
+    k1 = rsa(512)
+    print(k1.public_key)
+    print(k1.private_key)
+    m = 'abcdefghijklmnopqrstuvwxyz' * 10
+    print(k1.encrypt(m))
+    print(k1.decrypt(k1.encrypt(m)))
+    c = '374b8516a6fd5adfc42f047e2dbb686a52295be98f08f833d5d842812eedbcabfec45244384aafbba119f8770acc40777e06d8aac9d1462e5db70f8b9a528ee99f740c998d8976bb4d907ff45d115c32b231d469b6c1a92af07e23604fea8227c492b2316b727228a0be964593f8d3290b646225b7332cd6e0a36dd687e0706133cf0e01c475d78e0b8dc9ae91b718fba9d3024bb96aaf6417a72e8699692643407cbc3fbc57fdacddc2a2f698fe156bc929933b5dd4b928b68e2e221ee923ff4312a54b230c2b05ef35a1263276d976ad5c5a9dbd5f8ded08476ed29f08e918cc48936453cbec939c8146b5359550f37f68b37cbf2c403de948b58ba131f365761ce78b284154013cc7e22fa32dd9dfb21f1c6a0f827dd9b1e289bb6ff76de10bbfd0ad2bdfad4ae192aa2b7dc2c7284039d96d598640abf75bdf5ed0a326c49cedaaaf297352e7a683765a37e89d6be0e3bf3984c3ca2cd600657189dfc480d049d002614da8641e177a4a1a2f7d04ce92a1d14d0e99b80fe4b90eb95d85ecd2e4abec04b9aed7bb15c50aae8acbd6b458f7a8ac1d136ad56f11f4acb9899de5777b1e07c8416b7dedac27e2190d249de71a4c9bd6a800ee99dfe17cffa3475527de9e4a259a8c112e18ac12a1b60c0793fbb399091ee5d68494470d51e0fd12e8e57252f04d010f9cc125495dcf130b35c39bf2d96ff4cd726c0e4b9698f9a3ab927e80f4d011bdfd38274843f1883e859824a0ab4d005e82597fbd755caab79e26ef0853227ee1ee91c06fd6646255c7c34ff9dbefbdc774211936d9c1e63986e84b4d0929b775ccc98d8f6eb4cd0b35f6f7f6a95c14be5c4c1111413bffc0672822c32a6d950767a56d2f0c4381b8158de2a91864509f71e147e73ae7c'
+    p_k = (66178137859947552294398775255802548131934535631352006996001768150973805789119926110454870176327677268631949099257033283723185302659618363275275761532415743102822176613384047900391045477262069197380449587134929546173719276767726845022806267579748687327002433086729059218158505544514907284650347186194039945319, 9761466745653204245928392454340672992415807153030803224276936131364484637778515883235181156356068176172939587781492786324996509680805313365540043874880574708820757382450790625765509381638050412780570426803821247188292498760873872404858533182202090795600387228109319361972870957945179536022489733176256775451)
+    k2 = rsa(512, flag=1)
+    k2.add_private_key(p_k)
+    print(k2.decrypt(c))
 
 if __name__ == '__main__':
     test()
