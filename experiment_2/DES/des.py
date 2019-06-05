@@ -1,6 +1,5 @@
 #!/opt/anaconda/python3
 # -*- coding=utf-8 -*-
-import base64
 import random
 
 
@@ -92,7 +91,7 @@ class des:
         # group plain_text into list
         # each element in list has 64 bits
         plain_text_list = group_text(self.plain_text, 64)
-        plain_text_list = [add_zero_last(i, 16) for i in plain_text_list]
+        plain_text_list = [add_zero_front(i, 64) for i in plain_text_list]
         crypto_text = ''
         # using run_coding to encode each piece of plain_text
         for each in range(len(plain_text_list)):
@@ -109,9 +108,9 @@ class des:
         plain_text = ''
         # using run_coding to encode each piece of plain_text
         for each in range(len(crypto_text_list)):
-            temp = self.run(crypto_text_list[each], -1)
+            temp = self.run(add_zero_front(hex2bin(crypto_text_list[each]), 64), -1)
             plain_text += temp
-        self.plain_text = bin2hex(plain_text)
+        self.plain_text = num2str(int(plain_text, 2))
         return self.plain_text
 
     def run(self, part_text, number):
@@ -121,7 +120,7 @@ class des:
         :param number: number is a flag to show that run for encrypt or decrypt
         :return: return encrypted part text
         """
-        temp_text = add_zero_front(hex2bin(part_text), 64)
+        temp_text = part_text
         # use ip_switch to switch the text by ip(1)
         atfer_ip_switch_text = ip_switch(temp_text, 1)
         # run feistel net with key_list to coding the text
@@ -140,11 +139,15 @@ def feistel_net(bin_text, key_list, number):
     :return: after feistel net text
     """
     temp_text = bin_text
-    for i in list(range(0, 16))[::number]:
+    for i in list(range(0, 15))[::number]:
         left_text = temp_text[:32]
         right_text = temp_text[32:]
         temp = function_f(right_text, key_list[i])
         temp_text = right_text + xor(left_text, temp, 32)
+    left_text = temp_text[:32]
+    right_text = temp_text[32:]
+    temp = function_f(right_text, key_list[15])
+    temp_text = xor(left_text, temp, 32) + right_text
     return temp_text
 
 
@@ -218,7 +221,8 @@ def s_box_switch(bin_text):
     text_list = group_text(bin_text, 6)
     result_text = ''
     for i in range(len(text_list)):
-        result_text += s_switch(text_list[i], s_box[i])
+        temp = s_switch(text_list[i], s_box[i])
+        result_text += temp
     return result_text
 
 
@@ -297,25 +301,10 @@ def num2str(number):
     return result[::-1]
 
 
-def encoding(text):
-    temp1 = base64.b64encode(text.encode('utf-8'))
-    temp2 = base64.b16encode(temp1)
-    return temp2.decode('utf-8')
-
-
 def add_zero_front(bin_text, number):
     # add zero in the front of the source_text until the length of it is equal to number
     if len(bin_text) < number:
         result_text = '0' * (number - len(bin_text)) + bin_text
-    else:
-        result_text = bin_text
-    return result_text
-
-
-def add_zero_last(bin_text, number):
-    # add zero in the last of the source_text until the length of it is equal to number
-    if len(bin_text) < number:
-        result_text = bin_text + '0' * (number - len(bin_text))
     else:
         result_text = bin_text
     return result_text
@@ -407,17 +396,12 @@ def create_des_key():
     return bin2hex(key)
 
 
-def print_list(lists):
-    for i in lists:
-        print(i)
-
-
 def main():
     key = 'f'*16
     x = des(key)
-    print_list(x.key_list)
-    m = '111111'
-    c = '22a4794110fcf47a'
+    m = 'abcdefghijklmnopqrstuvwxyz'*10
+    c = 'bb6bf1593cf73c70c1673e5be89590cc32e17fdd754986fdd86f02077756939b2b7a3366f394c370423ce8914d6614d3d7fec14f0a2694ab7fced134d0b47cfc10560b1726d3f5b96535434ff055c583a59b73fdfa30724e9f924975cfc0c9a971eef488169229acbb6bf1593cf73c70c1673e5be89590cc32e17fdd754986fdd86f02077756939b2b7a3366f394c370423ce8914d6614d3d7fec14f0a2694ab7fced134d0b47cfc10560b1726d3f5b96535434ff055c583a59b73fdfa30724e9f924975cfc0c9a971eef488169229acbb6bf1593cf73c70c1673e5be89590cc32e17fdd754986fdd86f02077756939b2b7a3366f394c370423ce8914d6614d347489a56a69c9690'
+    print(bin2hex(str2num(m)))
     print(x.encrypt(m))
     print(x.decrypt(c))
 
