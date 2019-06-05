@@ -88,12 +88,10 @@ class des:
         :param plain_text: plain_text
         :return:
         """
-        # coding by 'utf-8'
-        self.plain_text = encoding(plain_text)
-        print(self.plain_text)
+        self.plain_text = str2num(plain_text)
         # group plain_text into list
         # each element in list has 64 bits
-        plain_text_list = group_text(self.plain_text, 16)
+        plain_text_list = group_text(self.plain_text, 64)
         plain_text_list = [add_zero_last(i, 16) for i in plain_text_list]
         crypto_text = ''
         # using run_coding to encode each piece of plain_text
@@ -108,7 +106,6 @@ class des:
         # group plain_text into list
         # each element in list has 64 bits
         crypto_text_list = group_text(self.crypto_text, 16)
-        print(crypto_text_list)
         plain_text = ''
         # using run_coding to encode each piece of plain_text
         for each in range(len(crypto_text_list)):
@@ -144,12 +141,10 @@ def feistel_net(bin_text, key_list, number):
     """
     temp_text = bin_text
     for i in list(range(0, 16))[::number]:
-        print(i, '', end='')
         left_text = temp_text[:32]
         right_text = temp_text[32:]
         temp = function_f(right_text, key_list[i])
         temp_text = right_text + xor(left_text, temp, 32)
-    print()
     return temp_text
 
 
@@ -276,6 +271,32 @@ def ip_switch(bin_text, ip_choose):
     return result_text
 
 
+def str2num(string):
+    # change string to number
+    # string must be ASCII string
+    result = ''
+    for i in string:
+        temp = add_zero_front(bin(ord(i)).replace('0b', ''), 8)
+        result += temp
+    return result
+
+
+def num2str(number):
+    # change number to string
+    # the string must be ASCII string
+    result = ''
+    number_bin = bin(number).replace('0b', '')[::-1]
+    temp = ''
+    for i in range(len(number_bin)):
+        temp += number_bin[i]
+        if (i + 1) % 8 == 0:
+            result += chr(int(temp[::-1], 2))
+            temp = ''
+    if len(temp) > 0:
+        result += chr(int(temp[::-1], 2))
+    return result[::-1]
+
+
 def encoding(text):
     temp1 = base64.b64encode(text.encode('utf-8'))
     temp2 = base64.b16encode(temp1)
@@ -386,9 +407,15 @@ def create_des_key():
     return bin2hex(key)
 
 
-def test():
+def print_list(lists):
+    for i in lists:
+        print(i)
+
+
+def main():
     key = 'f'*16
     x = des(key)
+    print_list(x.key_list)
     m = '111111'
     c = '22a4794110fcf47a'
     print(x.encrypt(m))
@@ -396,4 +423,4 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    main()
