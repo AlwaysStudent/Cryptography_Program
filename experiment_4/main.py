@@ -5,7 +5,7 @@ from RSA import rsa
 
 def main():
     m = 'abcdefghijklmnopqrstuvwxyz' * 20
-    k1 = rsa.rsa(512)
+    k1 = rsa.rsa(1024)
     print('[info] The public key:\n', k1.create_public_key())
     print('[info] The private key:\n', k1.create_private_key())
     c = k1.encrypt(m)
