@@ -1,10 +1,14 @@
 # __Vigenere密码__
+
 ---
+
 > 维吉尼亚密码（又译维热纳尔密码）是使用一系列凯撒密码组成密码字母表的加密算法，属于多表密码的一种简单形式。
 
 这里使用python进行编写
 [维吉尼亚密码在线解密](https://www.kidclark.com/vigener/)
+
 ### __模块使用方法__
+
 下载本模块到本地，解压为``Vigenere``文件夹
 在文件夹所在目录下进行代码编写
 
@@ -14,7 +18,7 @@ from Vigenere import vigenere
 
 使用上面的指令导入该模块（在pycharm中可能会出现识别错误，在命令行下没有问题）
 
-### __加解 & 解密（有密钥）__
+### __加密 & 解密（有密钥）__
 
 #### __创建对象__
 
@@ -25,9 +29,10 @@ t = vigenere.vigenere(key)
 使用``vigenere.vigenere(key)``建立``vigenere``对象
 
 + 注: ``key``的类型为``list``，如
-```python
-key = [4, 7, 2, 3]
-```
+  
+  ```python
+  key = [4, 7, 2, 3]
+  ```
 
 #### __加密 & 解密__
 
@@ -54,6 +59,7 @@ t = vigenere.vigenere(key=‘’)
 ```python
 t.try_to_decode(ciphertext)
 ```
+
 使用``try_to_decode``方法进行无密钥解密
 
 ### __其他__
