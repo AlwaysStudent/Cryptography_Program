@@ -94,7 +94,6 @@ class des:
         plain_text_list = group_text(self.plain_text, 64)
 
         plain_text_list = [add_zero_front(i, 64) for i in plain_text_list]
-        print(plain_text_list)
         crypto_text = ''
         # using run_coding to encode each piece of plain_text
         for each in range(len(plain_text_list)):
@@ -398,21 +397,3 @@ def create_des_key():
             key += str(temp)
             temp = 0
     return bin2hex(key)
-
-
-def main():
-    key = create_des_key()
-    # key = 'f' * 16
-    x = des(key)
-    [print(add_zero_front(hex2bin(i), 48)) for i in x.key_list]
-    m = 'abcdef'*10
-    c = x.encrypt(m)
-    print(m)
-    print()
-    print(c)
-    print()
-    print(c)
-
-
-if __name__ == '__main__':
-    main()
