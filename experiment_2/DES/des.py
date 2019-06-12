@@ -76,6 +76,7 @@ class des:
         for i in range(1, 17):
             key_c = bin_text_shift(key_c, i)
             key_d = bin_text_shift(key_d, i)
+
             temp_key = key_c + key_d
             each_round_key = switch_by_matrix(temp_key, pc_switch_2)
             key_list.append(bin2hex(each_round_key))
@@ -91,7 +92,9 @@ class des:
         # group plain_text into list
         # each element in list has 64 bits
         plain_text_list = group_text(self.plain_text, 64)
+
         plain_text_list = [add_zero_front(i, 64) for i in plain_text_list]
+        print(plain_text_list)
         crypto_text = ''
         # using run_coding to encode each piece of plain_text
         for each in range(len(plain_text_list)):
@@ -139,14 +142,15 @@ def feistel_net(bin_text, key_list, number):
     :return: after feistel net text
     """
     temp_text = bin_text
-    for i in list(range(0, 15))[::number]:
+    key_list_temp = key_list[::number]
+    for i in range(0, 15):
         left_text = temp_text[:32]
         right_text = temp_text[32:]
-        temp = function_f(right_text, key_list[i])
+        temp = function_f(right_text, key_list_temp[i])
         temp_text = right_text + xor(left_text, temp, 32)
     left_text = temp_text[:32]
     right_text = temp_text[32:]
-    temp = function_f(right_text, key_list[15])
+    temp = function_f(right_text, key_list_temp[15])
     temp_text = xor(left_text, temp, 32) + right_text
     return temp_text
 
@@ -170,7 +174,7 @@ def function_f(right_bin_text, key):
                 [1, 15, 23, 26, 5, 18, 31, 10],
                 [2, 8, 24, 14, 32, 27, 3, 9],
                 [19, 13, 30, 6, 22, 11, 4, 25]]
-    temp_key = hex2bin(key)
+    temp_key = add_zero_front(hex2bin(key), 48)
     after_e_switch_text = switch_by_matrix(right_bin_text, e_switch)
     after_xor_key = xor(after_e_switch_text, temp_key, 48)
     after_s_box_text = s_box_switch(after_xor_key)
@@ -397,13 +401,17 @@ def create_des_key():
 
 
 def main():
-    key = 'f'*16
+    key = create_des_key()
+    # key = 'f' * 16
     x = des(key)
-    m = 'abcdefghijklmnopqrstuvwxyz'*10
-    c = 'bb6bf1593cf73c70c1673e5be89590cc32e17fdd754986fdd86f02077756939b2b7a3366f394c370423ce8914d6614d3d7fec14f0a2694ab7fced134d0b47cfc10560b1726d3f5b96535434ff055c583a59b73fdfa30724e9f924975cfc0c9a971eef488169229acbb6bf1593cf73c70c1673e5be89590cc32e17fdd754986fdd86f02077756939b2b7a3366f394c370423ce8914d6614d3d7fec14f0a2694ab7fced134d0b47cfc10560b1726d3f5b96535434ff055c583a59b73fdfa30724e9f924975cfc0c9a971eef488169229acbb6bf1593cf73c70c1673e5be89590cc32e17fdd754986fdd86f02077756939b2b7a3366f394c370423ce8914d6614d347489a56a69c9690'
-    print(bin2hex(str2num(m)))
-    print(x.encrypt(m))
-    print(x.decrypt(c))
+    [print(add_zero_front(hex2bin(i), 48)) for i in x.key_list]
+    m = 'abcdef'*10
+    c = x.encrypt(m)
+    print(m)
+    print()
+    print(c)
+    print()
+    print(c)
 
 
 if __name__ == '__main__':
